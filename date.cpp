@@ -1,43 +1,25 @@
+// A very simple implementation of a date class, just to highlight
+// some of the features of C++.
+// Compile with:  g++ -std=c++14 -c date.cpp -o date.o
+
 #include <iostream>
 #include <string>
 #include <time.h>
+#include "date.h"
 using namespace std;
 
-class Date
-{
-private:
-	int month, day, year;
-	int days_per_month[13] = {0, 31, 28, 31, 30, 31, 31, 30, 31, 30, 31, 30, 31};
-public:
-	//These are constructors
-	Date();
-	Date(int day, int month, int year);
-	//Destructor 
-	~Date(){}
-
-    bool isValid();
-	bool isLeapYear();
-	bool operator==(Date date2);
-	bool operator<(Date date2);
-	bool operator>(Date date2);
-	int getDaysPerMonth();
-	Date getPreviousDay();
-	Date getNDaysPrevious (int days);
-
-	void setToToday();
-	void setDay(int day);
-	void setMonth(int month);
-	void setYear(int year);
-	
-	friend ostream& operator<<(ostream& os, const Date& dt);
-};
-
+/**
+ * Construct a new empty Date object
+ */
 Date::Date()
 {
 	//Initialize variables.
 	month = 0, day = 0, year = 0;
 }
 
+/**
+ * Construct a new Date object from values
+ */
 Date::Date(int day, int month, int year)
 {
 	this->month = month;
@@ -45,6 +27,18 @@ Date::Date(int day, int month, int year)
 	this->year = year;
 }
 
+/**
+ * Copy constructor: construct a new Date object from an old one
+ */
+Date::Date(const Date& d){
+    this->day = d.day;
+    this->month = d.month;
+    this->year = d.year;
+}
+
+/**
+ * Checks if a date is valid
+ */
 bool Date::isValid (){
     if (day > 31 || 
         day < 1 ||
@@ -62,6 +56,9 @@ bool Date::isValid (){
     }
 }
 
+/**
+ * Checks if date is in a leap year
+ */
 bool Date::isLeapYear (){
     if (year % 4 > 0){
         // Not divisible by 4, not a leap year
@@ -83,6 +80,10 @@ bool Date::isLeapYear (){
     }
 }
 
+/**
+ * Equality operator, compares this date to another one
+ * returns true if equal.
+ */
 bool Date::operator==(Date date2)
 {
     if (day == date2.day &&
@@ -95,6 +96,10 @@ bool Date::operator==(Date date2)
     }
 }
 
+/**
+ * Less-than operator, returns true if this date is before
+ * the other.
+ */
 bool Date::operator< (Date second){
 
     if(year < second.year) {
@@ -117,10 +122,25 @@ bool Date::operator< (Date second){
     }
 }
 
+/**
+ * Greater-than operator, returns true if this date
+ * is after the other.
+ */
 bool Date::operator> (Date earlier){
     return earlier < *this;
 }
 
+/**
+ * Decrease operator. Decreases this date by one day.
+ */
+Date& Date::operator--(){
+    *this = this->getPreviousDay();
+    return *this;
+}
+
+/**
+ * Returns the previous day of this date. 
+ */
 Date Date::getPreviousDay()
 {
 	Date other(day, month, year);
@@ -145,6 +165,18 @@ Date Date::getPreviousDay()
     return other;
 }
 
+/**
+ * Decrease operator. Decreases this date by the given 
+ * number of days.
+ */
+Date& Date::operator-=(int n){
+    *this = this->getNDaysPrevious(n);
+    return *this;
+}
+
+/**
+ * Decreases this date by the given number of days.
+ */
 Date Date::getNDaysPrevious (int days){
     Date index_date(day, month, year);
 
@@ -155,6 +187,9 @@ Date Date::getNDaysPrevious (int days){
     return index_date;
 }
 
+/**
+ * Sets the date to today.
+ */
 void Date::setToToday(){
     time_t today_in_seconds;
     struct tm * timeinfo;
@@ -167,6 +202,9 @@ void Date::setToToday(){
     year = timeinfo->tm_year + 1900; //tm_year years since 1900
 }
 
+/**
+ * Returns the number of days in the month of this date.
+ */
 int Date::getDaysPerMonth(){
     if ((month == 2) && (this->isLeapYear())){
         return 29;
@@ -176,22 +214,34 @@ int Date::getDaysPerMonth(){
     }
 }
 
+/**
+ * Setter function for the day. Does not check that
+ * the resulting date is valid.
+ */
 void Date::setDay(int d)
 {
 	if (d < 1 || d > 31)
 		cout << "The day is invalid" << endl;
 	else
-	day = d;
-	
+	day = d;	
 }
+
+/**
+ * Setter function for the month. Does not check that
+ * the resulting date is valid.
+ */
 void Date::setMonth(int m)
 {
 	if (m < 1 || m > 12)
 		cout << "The month is invalid" << endl;
 	else
-	month = m;
-	
+	month = m;	
 }
+
+/**
+ * Setter function for the year. Does not check that 
+ * the resulting date is valid.
+ */
 void Date::setYear(int y)
 {
 	if (y < 1900 || y > 2200)
@@ -200,28 +250,29 @@ void Date::setYear(int y)
 		year = y;
 }
 
+/**
+ * Outstream operator. Outputs the date in format
+ * d.m.y on the given
+ */
 ostream& operator<<(ostream& os, const Date& dt)
 {
     os << dt.day << '.' << dt.month << '.' << dt.year;
     return os;
 }
 
-int main(){
+/**
+ * Instream operator. Inputs the date in format
+ * d.m.y on the given
+ */
+istream& operator>>(istream& is, Date& dt)
+{
+    char c1, c2; // Dummy variables used to catch the delimiters. 
 
-	Date date1(25,1,2021);
-	Date date2;
+    is >> dt.day >> c1 >> dt.month >> c2 >> dt.year;
 
-	if (!date2.isValid()){
-		date2.setToToday();
-	}	
+    if (c1 != c2 || (c1 != '.' && c1 != '/' && c1 != '-')) {
+        is.setstate(std::ios::failbit);
+    }
 
-	if (date1 == date2){
-		cout << "Dates " << date1 << " and " << date2 << " equal" << endl;
-	} 
-	else if (date1 < date2){
-		cout << date1 << " is before " << date2 << endl;
-	}
-	else {
-		cout << date1 << " is after " << date2 << endl;
-	}
+    return is;
 }
