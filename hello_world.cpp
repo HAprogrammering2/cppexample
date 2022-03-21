@@ -28,7 +28,7 @@ int main(){
         cout << "Your choice: ";
         cin >> choice;
 
-        if (choice > 4) {
+        if (cin.fail() || choice > 4) {
             cout << "Wrong!" << endl;
             return EXIT_FAILURE;
         }
