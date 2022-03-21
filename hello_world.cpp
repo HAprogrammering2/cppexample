@@ -1,3 +1,6 @@
+// A small sample of some of the new features in C++ as compared with C.
+// Compile with:  g++ -std=c++14 hello_world.cpp
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -46,6 +49,7 @@ int main(){
     cout << "Your sorted command history:";
     for (auto item : history){
         cout << " " << item;
+        
         if (histogram.find(item) != histogram.end()){
             histogram[item]++;
         }
